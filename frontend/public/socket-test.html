@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Socket Connection Test</title>
+  <script src="https://cdn.socket.io/4.7.3/socket.io.min.js"></script>
+  <style>
+    body { font-family: Arial, sans-serif; max-width: 800px; margin: 0 auto; padding: 20px; }
+    .success { color: green; }
+    .error { color: red; }
+    .info { color: blue; }
+    #status, #results { margin: 20px 0; padding: 15px; border: 1px solid #ddd; border-radius: 5px; }
+    button { padding: 10px 15px; background: #4CAF50; color: white; border: none; border-radius: 4px; cursor: pointer; }
+    button:hover { background: #45a049; }
+  </style>
+</head>
+<body>
+  <h1>Socket Connection Test</h1>
+  <div id="status">Initializing...</div>
+  <div id="results"></div>
+  <button id="testBtn">Test Connection</button>
+
+  <script>
+    const statusDiv = document.getElementById('status');
+    const resultsDiv = document.getElementById('results');
+    const testBtn = document.getElementById('testBtn');
+    
+    function log(message, type = 'info') {
+      const el = document.createElement('p');
+      el.textContent = message;
+      el.className = type;
+      resultsDiv.appendChild(el);
+    }
+    
+    async function testConnection() {
+      statusDiv.textContent = 'Testing connection...';
+      statusDiv.className = 'info';
+      resultsDiv.innerHTML = '';
+      
+      try {
+        // Use port 8001 directly since we know it's working
+        log('Using backend port 8001...');
+        const workingPort = 8001;
+        log(`Using port: ${workingPort}`, 'success');
+        
+        // Try to connect to socket
+        const baseURL = `http://localhost:${workingPort}`;
+        log(`Connecting to socket at ${baseURL}...`);
+        
+        const socket = io(baseURL, {
+          transports: ["websocket", "polling"],
+          reconnection: true
+        });
+        
+        socket.on('connect', () => {
+          statusDiv.textContent = 'Socket connected successfully!';
+          statusDiv.className = 'success';
+          log(`Connected with socket ID: ${socket.id}`, 'success');
+          log(`Transport: ${socket.io.engine.transport.name}`, 'success');
+        });
+        
+        socket.on('connect_error', (error) => {
+          statusDiv.textContent = 'Socket connection failed!';
+          statusDiv.className = 'error';
+          log(`Connection error: ${error.message}`, 'error');
+        });
+        
+        socket.on('disconnect', (reason) => {
+          log(`Disconnected: ${reason}`, 'info');
+        });
+        
+        // Test room joining
+        setTimeout(() => {
+          if (socket.connected) {
+            log('Testing join-call event...');
+            const testRoom = 'test-room-' + Date.now();
+            const testUser = {
+              userId: 'test-user-' + Date.now(),
+              name: 'Test User',
+              title: 'Test Conference'
+            };
+            
+            socket.emit('join-call', testRoom, testUser);
+            log(`Emitted join-call event for room: ${testRoom}`);
+            
+            // Listen for user-joined event
+            socket.on('user-joined', (userId, connections) => {
+              log(`User joined event received: ${userId}`, 'success');
+            });
+          }
+        }, 2000);
+        
+      } catch (error) {
+        statusDiv.textContent = 'Test failed!';
+        statusDiv.className = 'error';
+        log(`Error: ${error.message}`, 'error');
+      }
+    }
+    
+    testBtn.addEventListener('click', testConnection);
+    
+    // Auto-run test on page load
+    window.addEventListener('load', testConnection);
+  </script>
+</body>
+</html>

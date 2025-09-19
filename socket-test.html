@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Socket.js Test</title>
+  <script src="https://cdn.socket.io/4.7.3/socket.io.min.js"></script>
+</head>
+<body>
+  <h1>Socket.js Test</h1>
+  <div id="status">Testing socket connection...</div>
+  <div id="results"></div>
+
+  <script type="module">
+    // Import socket.io client
+    const socket = io();
+    
+    // Test function
+    async function testSocketConnection() {
+      const resultsDiv = document.getElementById('results');
+      const statusDiv = document.getElementById('status');
+      
+      try {
+        // Try to connect to the backend
+        const baseURL = 'http://localhost:8001';
+        const socket = io(baseURL, {
+          transports: ["websocket", "polling"],
+          reconnection: true
+        });
+        
+        // Listen for connection
+        socket.on('connect', () => {
+          statusDiv.textContent = 'Socket connected successfully!';
+          statusDiv.style.color = 'green';
+          
+          // Add connection details
+          resultsDiv.innerHTML += `<p>Socket ID: ${socket.id}</p>`;
+          resultsDiv.innerHTML += `<p>Transport: ${socket.io.engine.transport.name}</p>`;
+          resultsDiv.innerHTML += `<p>Connected to: ${baseURL}</p>`;
+        });
+        
+        // Listen for connection error
+        socket.on('connect_error', (error) => {
+          statusDiv.textContent = 'Socket connection failed!';
+          statusDiv.style.color = 'red';
+          resultsDiv.innerHTML += `<p>Error: ${error.message}</p>`;
+        });
+      } catch (error) {
+        statusDiv.textContent = 'Socket test failed!';
+        statusDiv.style.color = 'red';
+        resultsDiv.innerHTML += `<p>Error: ${error.message}</p>`;
+      }
+    }
+    
+    // Run the test
+    testSocketConnection();
+  </script>
+</body>
+</html>

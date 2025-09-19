@@ -6,64 +6,100 @@ import bcrypt, { hash } from "bcrypt"
 import crypto from "crypto"
 import Meeting from "../models/meeting.model.js";
 const login = async (req, res) => {
+    const { email, password, role } = req.body;
 
-    const { username, password } = req.body;
-
-    if (!username || !password) {
-        return res.status(400).json({ message: "Please Provide" })
+    if (!email || !password) {
+        return res.status(400).json({ success: false, message: "Missing email or password" })
     }
 
     try {
-        const user = await User.findOne({ username });
+        const user = await User.findOne({ email });
         if (!user) {
-            return res.status(httpStatus.NOT_FOUND).json({ message: "User Not Found" })
+            return res.status(httpStatus.NOT_FOUND).json({ success: false, message: "User Not Found" })
         }
-
 
         let isPasswordCorrect = await bcrypt.compare(password, user.password)
 
         if (isPasswordCorrect) {
             let token = crypto.randomBytes(20).toString("hex");
 
+            // Update user role if provided
+            if (role && ['student', 'teacher', 'admin'].includes(role)) {
+                user.role = role;
+            }
+            
             user.token = token;
             await user.save();
-            return res.status(httpStatus.OK).json({ token: token })
+            
+            return res.status(httpStatus.OK).json({ 
+                success: true,
+                token: token,
+                user: {
+                    id: user._id,
+                    name: user.name,
+                    email: user.email,
+                    role: user.role || 'student'
+                }
+            })
         } else {
-            return res.status(httpStatus.UNAUTHORIZED).json({ message: "Invalid Username or password" })
+            return res.status(httpStatus.UNAUTHORIZED).json({ success: false, message: "Invalid email or password" })
         }
 
     } catch (e) {
-        return res.status(500).json({ message: `Something went wrong ${e}` })
+        return res.status(500).json({ success: false, message: `Something went wrong ${e}` })
     }
 }
 
 
 const register = async (req, res) => {
-    const { name, username, password } = req.body;
+    const { name, email, password, role } = req.body;
 
+    if (!name || !email || !password) {
+        return res.status(400).json({ success: false, message: "Missing required fields" });
+    }
 
     try {
-        const existingUser = await User.findOne({ username });
+        const existingUser = await User.findOne({ email });
         if (existingUser) {
-            return res.status(httpStatus.FOUND).json({ message: "User already exists" });
+            return res.status(httpStatus.FOUND).json({ success: false, message: "User already exists" });
         }
 
         const hashedPassword = await bcrypt.hash(password, 10);
 
-        const newUser = new User({
+        const userData = {
             name: name,
-            username: username,
+            email: email,
             password: hashedPassword
-        });
+        };
 
+        // Add role if provided
+        if (role && ['student', 'teacher', 'admin'].includes(role)) {
+            userData.role = role;
+        }
+
+        const newUser = new User(userData);
         await newUser.save();
 
-        res.status(httpStatus.CREATED).json({ message: "User Registered" })
+        // Generate token for auto-login
+        let token = crypto.randomBytes(20).toString("hex");
+        newUser.token = token;
+        await newUser.save();
+
+        res.status(httpStatus.CREATED).json({
+            success: true,
+            message: "User Registered",
+            token: token,
+            user: {
+                id: newUser._id,
+                name: newUser.name,
+                email: newUser.email,
+                role: newUser.role || 'student'
+            }
+        });
 
     } catch (e) {
-        res.json({ message: `Something went wrong ${e}` })
+        res.status(500).json({ success: false, message: `Something went wrong ${e}` });
     }
-
 }
 
 
@@ -72,10 +108,15 @@ const getUserHistory = async (req, res) => {
 
     try {
         const user = await User.findOne({ token: token });
-        const meetings = await Meeting.find({ user_id: user.username })
-        res.json(meetings)
+        if (!user) {
+            return res.status(httpStatus.NOT_FOUND).json({ success: false, message: "User not found" });
+        }
+        
+        const userId = user.username || user.email;
+        const meetings = await Meeting.find({ user_id: userId });
+        res.status(httpStatus.OK).json({ success: true, data: meetings });
     } catch (e) {
-        res.json({ message: `Something went wrong ${e}` })
+        res.status(500).json({ success: false, message: `Something went wrong ${e}` });
     }
 }
 
@@ -84,17 +125,21 @@ const addToHistory = async (req, res) => {
 
     try {
         const user = await User.findOne({ token: token });
+        if (!user) {
+            return res.status(httpStatus.NOT_FOUND).json({ success: false, message: "User not found" });
+        }
 
+        const userId = user.username || user.email;
         const newMeeting = new Meeting({
-            user_id: user.username,
+            user_id: userId,
             meetingCode: meeting_code
-        })
+        });
 
         await newMeeting.save();
 
-        res.status(httpStatus.CREATED).json({ message: "Added code to history" })
+        res.status(httpStatus.CREATED).json({ success: true, message: "Added code to history" });
     } catch (e) {
-        res.json({ message: `Something went wrong ${e}` })
+        res.status(500).json({ success: false, message: `Something went wrong ${e}` });
     }
 }
 
