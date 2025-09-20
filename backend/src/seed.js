@@ -7,12 +7,9 @@ import User from './models/user.model.js';
 dotenv.config();
 
 // Connect to MongoDB
-mongoose.connect(process.env.MONGODB_URI || 'mongodb://localhost:27017/vidyalink')
-  .then(() => console.log('MongoDB connected for seeding'))
-  .catch(err => {
-    console.error('MongoDB connection error:', err);
-    process.exit(1);
-  });
+const connectionDb = await mongoose.connect(
+  "mongodb+srv://vineshgoswami45_db_user:O4upcYOrnlXmNE78@cluster0.skq1hww.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0"
+);
 
 // Sample user data
 const users = [
