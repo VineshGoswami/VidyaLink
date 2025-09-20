@@ -144,4 +144,61 @@ const addToHistory = async (req, res) => {
 }
 
 
-export { login, register, getUserHistory, addToHistory }
+const updateProfile = async (req, res) => {
+    const userId = req.user.id;
+    const { name, currentPassword, newPassword } = req.body;
+
+    try {
+        // Find the user
+        const user = await User.findById(userId);
+        if (!user) {
+            return res.status(httpStatus.NOT_FOUND).json({ 
+                success: false, 
+                message: "User not found" 
+            });
+        }
+
+        // Update name if provided
+        if (name) {
+            user.name = name;
+        }
+
+        // Handle password change if requested
+        if (currentPassword && newPassword) {
+            // Verify current password
+            const isPasswordCorrect = await bcrypt.compare(currentPassword, user.password);
+            if (!isPasswordCorrect) {
+                return res.status(httpStatus.UNAUTHORIZED).json({ 
+                    success: false, 
+                    message: "Current password is incorrect" 
+                });
+            }
+
+            // Hash and set new password
+            user.password = await bcrypt.hash(newPassword, 10);
+        }
+
+        // Save the updated user
+        await user.save();
+
+        // Return success response
+        return res.status(httpStatus.OK).json({
+            success: true,
+            message: "Profile updated successfully",
+            user: {
+                id: user._id,
+                name: user.name,
+                email: user.email,
+                role: user.role
+            }
+        });
+    } catch (error) {
+        console.error("Profile update error:", error);
+        return res.status(httpStatus.INTERNAL_SERVER_ERROR).json({
+            success: false,
+            message: "An error occurred while updating your profile"
+        });
+    }
+};
+
+export { login, register, getUserHistory, addToHistory, updateProfile }

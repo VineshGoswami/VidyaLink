@@ -12,6 +12,7 @@ import ContentLibrary from './pages/content-library';
 import EducatorDashboard from './pages/educator-dashboard';
 import VideoConference from './pages/video-conference';
 import JoinConference from './pages/join-conference';
+import Profile from './pages/profile';
 
 // Import authentication components
 import ProtectedRoute from './components/ProtectedRoute';
@@ -79,6 +80,12 @@ const Routes = () => {
             <Route path="/video-conference" element={
               <ProtectedRoute>
                 <VideoConference />
+              </ProtectedRoute>
+            } />
+            
+            <Route path="/profile" element={
+              <ProtectedRoute>
+                <Profile />
               </ProtectedRoute>
             } />
             

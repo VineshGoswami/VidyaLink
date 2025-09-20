@@ -276,12 +276,17 @@ export const AuthProvider = ({ children }) => {
   // Logout function
   const logout = async () => {
     try {
-      // Disconnect socket
-      const socketModule = await import('../utils/socketService');
-      socketModule.disconnectSocket();
-      setSocketConnected(false);
+      // Disconnect socket - wrap in try/catch to prevent failures
+      try {
+        const socketModule = await import('../utils/socketService');
+        await socketModule.disconnectSocket();
+        setSocketConnected(false);
+      } catch (socketError) {
+        console.error('Socket disconnect error:', socketError);
+        // Continue with logout even if socket disconnect fails
+      }
       
-      // Clear local storage
+      // Clear local storage - guaranteed to execute
       localStorage.removeItem('vidyalink_auth');
       localStorage.removeItem('vidyalink_user');
       if (!localStorage.getItem('vidyalink_remember')) {
@@ -295,8 +300,10 @@ export const AuthProvider = ({ children }) => {
       // Clear API headers
       delete api.defaults.headers.common['Authorization'];
       
-      // Navigate to login
-      navigate('/login');
+      // Navigate to login - force a small delay to ensure state updates
+      setTimeout(() => {
+        navigate('/login');
+      }, 100);
     } catch (err) {
       console.error('Logout error:', err);
       // Fallback logout even if socket disconnect fails

@@ -35,22 +35,28 @@ const Signup = () => {
       // Call the register API endpoint
       const response = await api.post('/auth/register', signupData);
 
-      if (response.data.success) {
+      if (response && response.data && response.data.success) {
         setSignupSuccess(true);
         
         // Auto login after successful signup
-        await login({
-          email: formData.email,
-          password: formData.password,
-          role: formData.role,
-          rememberMe: false
-        });
+        try {
+          await login({
+            email: formData.email,
+            password: formData.password,
+            role: formData.role,
+            rememberMe: false
+          });
+        } catch (loginErr) {
+          console.error("Auto-login failed after signup:", loginErr);
+          // Still consider signup successful even if auto-login fails
+        }
       } else {
-        setError(response.data.message || 'Signup failed');
+        setError((response && response.data && response.data.message) || 'Signup failed');
       }
     } catch (err) {
-      const serverMsg = err?.response?.data?.message || err?.response?.data?.msg;
-      const errorMessage = serverMsg || err?.message || 'Signup failed';
+      console.error("Signup error:", err);
+      const serverMsg = err && err.response && (err.response.data.message || err.response.data.msg);
+      const errorMessage = serverMsg || (err && err.message) || 'Network error. Please try again.';
       setError(errorMessage);
     } finally {
       setLoading(false);

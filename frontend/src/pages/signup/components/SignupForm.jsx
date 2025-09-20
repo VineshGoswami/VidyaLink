@@ -18,38 +18,38 @@ const SignupForm = ({ onSubmit, isLoading, error }) => {
   const validateForm = () => {
     const errors = {};
     
-    if (!formData?.name) {
+    if (!formData.name) {
       errors.name = 'Name is required';
     }
     
-    if (!formData?.email) {
+    if (!formData.email) {
       errors.email = 'Email is required';
-    } else if (!/\S+@\S+\.\S+/.test(formData?.email)) {
+    } else if (!/\S+@\S+\.\S+/.test(formData.email)) {
       errors.email = 'Please enter a valid email address';
     }
     
-    if (!formData?.password) {
+    if (!formData.password) {
       errors.password = 'Password is required';
-    } else if (formData?.password?.length < 6) {
+    } else if (formData.password.length < 6) {
       errors.password = 'Password must be at least 6 characters';
     }
     
-    if (!formData?.confirmPassword) {
+    if (!formData.confirmPassword) {
       errors.confirmPassword = 'Please confirm your password';
-    } else if (formData?.password !== formData?.confirmPassword) {
+    } else if (formData.password !== formData.confirmPassword) {
       errors.confirmPassword = 'Passwords do not match';
     }
     
-    if (!formData?.agreeToTerms) {
+    if (!formData.agreeToTerms) {
       errors.agreeToTerms = 'You must agree to the terms and conditions';
     }
     
     setValidationErrors(errors);
-    return Object.keys(errors)?.length === 0;
+    return Object.keys(errors).length === 0;
   };
 
   const handleSubmit = (e) => {
-    e?.preventDefault();
+    e.preventDefault();
     if (validateForm()) {
       onSubmit(formData);
     }
@@ -58,7 +58,7 @@ const SignupForm = ({ onSubmit, isLoading, error }) => {
   const handleInputChange = (field, value) => {
     setFormData(prev => ({ ...prev, [field]: value }));
     // Clear validation error when user starts typing
-    if (validationErrors?.[field]) {
+    if (validationErrors[field]) {
       setValidationErrors(prev => ({ ...prev, [field]: '' }));
     }
   };
@@ -76,9 +76,9 @@ const SignupForm = ({ onSubmit, isLoading, error }) => {
         label="Full Name"
         type="text"
         placeholder="Enter your full name"
-        value={formData?.name}
-        onChange={(e) => handleInputChange('name', e?.target?.value)}
-        error={validationErrors?.name}
+        value={formData.name}
+        onChange={(e) => handleInputChange('name', e.target.value)}
+        error={validationErrors.name}
         required
         disabled={isLoading}
       />
@@ -87,9 +87,9 @@ const SignupForm = ({ onSubmit, isLoading, error }) => {
         label="Email Address"
         type="email"
         placeholder="Enter your email"
-        value={formData?.email}
-        onChange={(e) => handleInputChange('email', e?.target?.value)}
-        error={validationErrors?.email}
+        value={formData.email}
+        onChange={(e) => handleInputChange('email', e.target.value)}
+        error={validationErrors.email}
         required
         disabled={isLoading}
       />
@@ -98,9 +98,9 @@ const SignupForm = ({ onSubmit, isLoading, error }) => {
         label="Password"
         type="password"
         placeholder="Create a password"
-        value={formData?.password}
-        onChange={(e) => handleInputChange('password', e?.target?.value)}
-        error={validationErrors?.password}
+        value={formData.password}
+        onChange={(e) => handleInputChange('password', e.target.value)}
+        error={validationErrors.password}
         required
         disabled={isLoading}
       />
@@ -109,9 +109,9 @@ const SignupForm = ({ onSubmit, isLoading, error }) => {
         label="Confirm Password"
         type="password"
         placeholder="Confirm your password"
-        value={formData?.confirmPassword}
-        onChange={(e) => handleInputChange('confirmPassword', e?.target?.value)}
-        error={validationErrors?.confirmPassword}
+        value={formData.confirmPassword}
+        onChange={(e) => handleInputChange('confirmPassword', e.target.value)}
+        error={validationErrors.confirmPassword}
         required
         disabled={isLoading}
       />
@@ -121,29 +121,29 @@ const SignupForm = ({ onSubmit, isLoading, error }) => {
           Select Your Role
         </label>
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-          {roleOptions?.map((role) => (
+          {roleOptions.map((role) => (
             <label
-              key={role?.value}
+              key={role.value}
               className={`flex items-center gap-3 p-3 border rounded-lg cursor-pointer transition-all duration-200 ${
-                formData?.role === role?.value
+                formData.role === role.value
                   ? 'border-primary bg-primary/5 text-primary' :'border-border hover:border-primary/50 hover:bg-muted/50'
               }`}
             >
               <input
                 type="radio"
                 name="role"
-                value={role?.value}
-                checked={formData?.role === role?.value}
-                onChange={(e) => handleInputChange('role', e?.target?.value)}
+                value={role.value}
+                checked={formData.role === role.value}
+                onChange={(e) => handleInputChange('role', e.target.value)}
                 className="sr-only"
                 disabled={isLoading}
               />
               <Icon 
-                name={role?.icon} 
+                name={role.icon} 
                 size={18} 
-                className={formData?.role === role?.value ? 'text-primary' : 'text-muted-foreground'}
+                className={formData.role === role.value ? 'text-primary' : 'text-muted-foreground'}
               />
-              <span className="text-sm font-medium">{role?.label}</span>
+              <span className="text-sm font-medium">{role.label}</span>
             </label>
           ))}
         </div>
@@ -152,10 +152,10 @@ const SignupForm = ({ onSubmit, isLoading, error }) => {
       <div className="flex items-start gap-2">
         <Checkbox
           label={<span>I agree to the <a href="#" className="text-primary hover:underline">Terms and Conditions</a></span>}
-          checked={formData?.agreeToTerms}
-          onChange={(e) => handleInputChange('agreeToTerms', e?.target?.checked)}
+          checked={formData.agreeToTerms}
+          onChange={(e) => handleInputChange('agreeToTerms', e.target.checked)}
           disabled={isLoading}
-          error={validationErrors?.agreeToTerms}
+          error={validationErrors.agreeToTerms}
         />
       </div>
       {/* Error Message */}

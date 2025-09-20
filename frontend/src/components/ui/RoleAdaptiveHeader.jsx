@@ -5,14 +5,18 @@ import ConnectionStatusIndicator from './ConnectionStatusIndicator';
 import { useAuth } from '../../contexts/AuthContext';
 
 const RoleAdaptiveHeader = ({ 
-  user = { role: 'student', name: 'User' }, 
+  user: propUser,
   onNavigate = () => {},
   className = '' 
 }) => {
   const navigate = useNavigate();
   const location = useLocation();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
-  const { logout } = useAuth();
+  const [isProfileMenuOpen, setIsProfileMenuOpen] = useState(false);
+  const { user: authUser, logout } = useAuth();
+  
+  // Use auth context user data if available, otherwise use props
+  const user = authUser || propUser || { role: 'student', name: 'User' };
 
   const navigationItems = {
     student: [
@@ -113,21 +117,40 @@ const RoleAdaptiveHeader = ({
                 {user?.role}
               </p>
             </div>
-            <div className="relative group">
-              <div className="w-8 h-8 bg-primary rounded-full flex items-center justify-center cursor-pointer">
+            <div className="relative">
+              <div 
+                className="w-8 h-8 bg-primary rounded-full flex items-center justify-center cursor-pointer"
+                onClick={() => setIsProfileMenuOpen(!isProfileMenuOpen)}
+              >
                 <span className="text-sm font-medium text-primary-foreground">
                   {user?.name?.charAt(0)?.toUpperCase()}
                 </span>
               </div>
-              <div className="absolute right-0 mt-2 w-48 bg-card border border-border rounded-lg shadow-lg py-1 hidden group-hover:block z-50">
-                <button
-                  onClick={logout}
-                  className="flex items-center gap-2 w-full px-4 py-2 text-sm text-muted-foreground hover:text-foreground hover:bg-muted/50 text-left"
-                >
-                  <Icon name="LogOut" size={16} />
-                  <span>Logout</span>
-                </button>
-              </div>
+              {isProfileMenuOpen && (
+                <div className="absolute right-0 mt-2 w-48 bg-card border border-border rounded-lg shadow-lg py-1 z-50">
+                  <button
+                    onClick={() => {
+                      navigate('/profile');
+                      setIsProfileMenuOpen(false);
+                    }}
+                    className="flex items-center gap-2 w-full px-4 py-2 text-sm text-muted-foreground hover:text-foreground hover:bg-muted/50 text-left"
+                  >
+                    <Icon name="User" size={16} />
+                    <span>Profile</span>
+                  </button>
+                  <div className="border-t border-border my-1"></div>
+                  <button
+                    onClick={() => {
+                      logout();
+                      setIsProfileMenuOpen(false);
+                    }}
+                    className="flex items-center gap-2 w-full px-4 py-2 text-sm text-muted-foreground hover:text-foreground hover:bg-muted/50 text-left"
+                  >
+                    <Icon name="LogOut" size={16} />
+                    <span>Sign Out</span>
+                  </button>
+                </div>
+              )}
             </div>
           </div>
 

@@ -16,24 +16,24 @@ const LoginForm = ({ onSubmit, isLoading, error }) => {
   const validateForm = () => {
     const errors = {};
     
-    if (!formData?.email) {
+    if (!formData.email) {
       errors.email = 'Email is required';
-    } else if (!/\S+@\S+\.\S+/?.test(formData?.email)) {
+    } else if (!/\S+@\S+\.\S+/.test(formData.email)) {
       errors.email = 'Please enter a valid email address';
     }
     
-    if (!formData?.password) {
+    if (!formData.password) {
       errors.password = 'Password is required';
-    } else if (formData?.password?.length < 6) {
+    } else if (formData.password.length < 6) {
       errors.password = 'Password must be at least 6 characters';
     }
     
     setValidationErrors(errors);
-    return Object.keys(errors)?.length === 0;
+    return Object.keys(errors).length === 0;
   };
 
   const handleSubmit = (e) => {
-    e?.preventDefault();
+    e.preventDefault();
     if (validateForm()) {
       onSubmit(formData);
     }
@@ -42,7 +42,7 @@ const LoginForm = ({ onSubmit, isLoading, error }) => {
   const handleInputChange = (field, value) => {
     setFormData(prev => ({ ...prev, [field]: value }));
     // Clear validation error when user starts typing
-    if (validationErrors?.[field]) {
+    if (validationErrors[field]) {
       setValidationErrors(prev => ({ ...prev, [field]: '' }));
     }
   };
@@ -60,9 +60,9 @@ const LoginForm = ({ onSubmit, isLoading, error }) => {
         label="Email Address"
         type="email"
         placeholder="Enter your email"
-        value={formData?.email}
-        onChange={(e) => handleInputChange('email', e?.target?.value)}
-        error={validationErrors?.email}
+        value={formData.email}
+        onChange={(e) => handleInputChange('email', e.target.value)}
+        error={validationErrors.email}
         required
         disabled={isLoading}
       />
@@ -71,9 +71,9 @@ const LoginForm = ({ onSubmit, isLoading, error }) => {
         label="Password"
         type="password"
         placeholder="Enter your password"
-        value={formData?.password}
-        onChange={(e) => handleInputChange('password', e?.target?.value)}
-        error={validationErrors?.password}
+        value={formData.password}
+        onChange={(e) => handleInputChange('password', e.target.value)}
+        error={validationErrors.password}
         required
         disabled={isLoading}
       />
@@ -83,29 +83,29 @@ const LoginForm = ({ onSubmit, isLoading, error }) => {
           Select Your Role
         </label>
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-          {roleOptions?.map((role) => (
+          {roleOptions.map((role) => (
             <label
-              key={role?.value}
+              key={role.value}
               className={`flex items-center gap-3 p-3 border rounded-lg cursor-pointer transition-all duration-200 ${
-                formData?.role === role?.value
+                formData.role === role.value
                   ? 'border-primary bg-primary/5 text-primary' :'border-border hover:border-primary/50 hover:bg-muted/50'
               }`}
             >
               <input
                 type="radio"
                 name="role"
-                value={role?.value}
-                checked={formData?.role === role?.value}
-                onChange={(e) => handleInputChange('role', e?.target?.value)}
+                value={role.value}
+                checked={formData.role === role.value}
+                onChange={(e) => handleInputChange('role', e.target.value)}
                 className="sr-only"
                 disabled={isLoading}
               />
               <Icon 
-                name={role?.icon} 
+                name={role.icon} 
                 size={18} 
-                className={formData?.role === role?.value ? 'text-primary' : 'text-muted-foreground'}
+                className={formData.role === role.value ? 'text-primary' : 'text-muted-foreground'}
               />
-              <span className="text-sm font-medium">{role?.label}</span>
+              <span className="text-sm font-medium">{role.label}</span>
             </label>
           ))}
         </div>
@@ -114,8 +114,8 @@ const LoginForm = ({ onSubmit, isLoading, error }) => {
       <div className="flex items-center justify-between">
         <Checkbox
           label="Remember me"
-          checked={formData?.rememberMe}
-          onChange={(e) => handleInputChange('rememberMe', e?.target?.checked)}
+          checked={formData.rememberMe}
+          onChange={(e) => handleInputChange('rememberMe', e.target.checked)}
           disabled={isLoading}
         />
         <button
